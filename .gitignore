@@ -1,0 +1,12 @@
+# scraper
+node_modules/
+
+# Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env*
+
+# misc
+*.log
+.DS_Store

@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARAM: 大亂鬥 Helper</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0d1117;
+      --surface: #161b22;
+      --surface2:#21262d;
+      --border:  #30363d;
+      --text:    #e6edf3;
+      --muted:   #8b949e;
+      --accent:  #58a6ff;
+      --s: #ff4757; --a: #ffa502; --b: #2ed573;
+      --c: #1e90ff; --d: #a29bfe; --e: #636e72;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    header { margin-bottom: 20px; }
+    header h1 { font-size: 1.4rem; color: var(--accent); }
+    header p  { color: var(--muted); font-size: .8125rem; margin-top: 4px; }
+
+    /* tabs */
+    .tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+    .tab {
+      padding: 8px 18px; border: none; background: none;
+      color: var(--muted); cursor: pointer; font-size: .875rem;
+      border-bottom: 2px solid transparent; transition: color .15s, border-color .15s;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .card h2 { font-size: .9375rem; font-weight: 600; margin-bottom: 12px; }
+
+    /* inputs */
+    .search-wrap { position: relative; }
+    input[type="text"] {
+      width: 100%; padding: 8px 12px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text); font-size: .875rem;
+      outline: none; transition: border-color .15s;
+    }
+    input[type="text"]:focus { border-color: var(--accent); }
+
+    /* suggestions dropdown */
+    .suggestions {
+      position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 6px; z-index: 200; max-height: 240px; overflow-y: auto;
+      display: none;
+    }
+    .sug-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px; cursor: pointer; font-size: .8125rem;
+    }
+    .sug-item:hover { background: var(--surface2); }
+    .sug-item .sug-sub { color: var(--muted); font-size: .75rem; }
+
+    /* tier badge */
+    .tb {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px; border-radius: 4px;
+      font-weight: 700; font-size: .75rem; flex-shrink: 0;
+    }
+    .tS { background: var(--s); color: #fff; }
+    .tA { background: var(--a); color: #000; }
+    .tB { background: var(--b); color: #000; }
+    .tC { background: var(--c); color: #fff; }
+    .tD { background: var(--d); color: #000; }
+    .tE { background: var(--e); color: #fff; }
+
+    /* champion tag pills */
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 20px; padding: 3px 10px 3px 5px; font-size: .8125rem;
+    }
+    .tag .rm { cursor: pointer; color: var(--muted); font-size: 1.1rem; line-height: 1; }
+    .tag .rm:hover { color: var(--s); }
+
+    /* champion info strip */
+    .champ-strip {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--surface2); border-radius: 6px; padding: 10px; margin-top: 10px;
+    }
+    .champ-strip .info .sub { color: var(--muted); font-size: .75rem; }
+
+    /* result list */
+    .result-list { display: flex; flex-direction: column; gap: 2px; }
+    .result-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px; border-radius: 6px;
+      transition: background .1s;
+    }
+    .result-row.top { background: rgba(88,166,255,.06); }
+    .result-row .rank { width: 26px; text-align: center; font-size: .875rem; font-weight: 700; color: var(--muted); }
+    .result-row .names { flex: 1; }
+    .result-row .names .zh { font-weight: 600; font-size: .875rem; }
+    .result-row .names .en { color: var(--muted); font-size: .75rem; }
+    .result-row .global-rank { color: var(--muted); font-size: .75rem; }
+
+    /* recommendation box */
+    .rec-box {
+      background: var(--surface2); border-radius: 6px; padding: 14px; margin-top: 12px;
+    }
+    .rec-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 6px; }
+    .rec-main { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+    .rec-keep { color: #2ed573; }
+    .rec-both { color: #ffa502; }
+    .rec-roll { color: var(--muted); font-size: .875rem; }
+    .rec-reason { color: var(--muted); font-size: .8125rem; margin-top: 8px; line-height: 1.55; }
+
+    /* augment result rows */
+    .aug-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 0; border-bottom: 1px solid var(--border); font-size: .875rem;
+    }
+    .aug-row:last-child { border-bottom: none; }
+    .aug-row .aug-names { flex: 1; }
+    .aug-row .aug-names .en { color: var(--muted); font-size: .75rem; }
+    .aug-row .score { color: var(--muted); font-size: .75rem; white-space: nowrap; }
+
+    /* button */
+    .btn {
+      padding: 8px 22px; background: var(--accent); color: #0d1117;
+      border: none; border-radius: 6px; font-weight: 700; font-size: .875rem;
+      cursor: pointer; transition: opacity .15s;
+    }
+    .btn:hover { opacity: .85; }
+
+    /* augment slot rows */
+    .aug-slots { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+    .aug-slot { display: flex; align-items: center; gap: 10px; }
+    .aug-slot .lbl { width: 64px; font-size: .75rem; color: var(--muted); flex-shrink: 0; }
+    .aug-slot .input-wrap { flex: 1; position: relative; }
+
+    /* error */
+    .err { color: var(--s); font-size: .8125rem; margin-top: 8px; }
+
+    /* loading / notice */
+    .notice { color: var(--muted); text-align: center; padding: 40px 20px; }
+    .notice a { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>ARAM: 大亂鬥 Helper</h1>
+  <p>英雄強度比較 &amp; 增強選項建議</p>
+</header>
+
+<div id="loading" class="notice">資料載入中...</div>
+
+<div id="app" style="display:none">
+  <div class="tabs">
+    <button class="tab active" data-tab="compare" onclick="switchTab('compare')">英雄比較</button>
+    <button class="tab" data-tab="augment" onclick="switchTab('augment')">增強建議</button>
+  </div>
+
+  <!-- ── Tab 1: Champion Compare ── -->
+  <div id="panel-compare" class="panel active">
+    <div class="card">
+      <h2>選擇英雄來比較強度</h2>
+      <div class="search-wrap" id="cmp-wrap">
+        <input id="cmp-input" type="text" placeholder="輸入英雄名稱（中文 / 英文 / key）..." autocomplete="off">
+        <div class="suggestions" id="cmp-sug"></div>
+      </div>
+      <div class="tags" id="cmp-tags"></div>
+    </div>
+    <div id="cmp-result"></div>
+  </div>
+
+  <!-- ── Tab 2: Augment Advisor ── -->
+  <div id="panel-augment" class="panel">
+    <div class="card">
+      <h2>選擇你的英雄</h2>
+      <div class="search-wrap" id="adv-champ-wrap">
+        <input id="adv-champ-input" type="text" placeholder="輸入英雄名稱..." autocomplete="off">
+        <div class="suggestions" id="adv-champ-sug"></div>
+      </div>
+      <div id="adv-champ-info"></div>
+    </div>
+
+    <div class="card" id="adv-aug-card" style="display:none">
+      <h2>輸入本輪增強選項（2–3 個）</h2>
+      <div class="aug-slots">
+        <div class="aug-slot">
+          <span class="lbl">選項 1</span>
+          <div class="input-wrap">
+            <input id="aug-inp-0" type="text" placeholder="點擊展開 / 輸入篩選..." autocomplete="off"
+                   onfocus="augShow(0)" oninput="augFilter(0)" onblur="augHide(0)">
+            <div class="suggestions" id="aug-sug-0"></div>
+          </div>
+        </div>
+        <div class="aug-slot">
+          <span class="lbl">選項 2</span>
+          <div class="input-wrap">
+            <input id="aug-inp-1" type="text" placeholder="點擊展開 / 輸入篩選..." autocomplete="off"
+                   onfocus="augShow(1)" oninput="augFilter(1)" onblur="augHide(1)">
+            <div class="suggestions" id="aug-sug-1"></div>
+          </div>
+        </div>
+        <div class="aug-slot">
+          <span class="lbl">選項 3</span>
+          <div class="input-wrap">
+            <input id="aug-inp-2" type="text" placeholder="（可選）點擊展開..." autocomplete="off"
+                   onfocus="augShow(2)" oninput="augFilter(2)" onblur="augHide(2)">
+            <div class="suggestions" id="aug-sug-2"></div>
+          </div>
+        </div>
+      </div>
+      <button class="btn" onclick="runAnalysis()">分析增強</button>
+      <p class="err" id="adv-err" style="display:none"></p>
+    </div>
+
+    <div id="adv-result"></div>
+  </div>
+</div>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────────────────
+let champions = [];          // full list from JSON
+let cmpList   = [];          // champions in compare tab
+let advChamp  = null;        // selected champion in advisor tab
+let advAugs   = [null, null, null]; // selected augments (slots 0-2)
+
+const TIER_ORD = { S:0, A:1, B:2, C:3, D:4, E:5 };
+
+// ─── Bootstrap ────────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    const r = await fetch('./aram-mayhem-data.json');
+    if (!r.ok) throw new Error();
+    const json = await r.json();
+    champions = json.champions;
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    bindCompareSearch();
+    bindAdvChampSearch();
+  } catch {
+    document.getElementById('loading').innerHTML =
+      '載入失敗。請用 HTTP 伺服器開啟此頁面：<br><br>' +
+      '<code>python3 -m http.server 8000</code><br><br>' +
+      '然後前往 <a href="http://localhost:8000">http://localhost:8000</a>';
+  }
+}
+
+// ─── Tabs ─────────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.tab === tab));
+  document.querySelectorAll('.panel').forEach(p =>
+    p.classList.toggle('active', p.id === `panel-${tab}`));
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function tb(tier) {
+  return `<span class="tb t${tier}">${tier}</span>`;
+}
+
+function searchChamps(q) {
+  if (!q.trim()) return [];
+  const lq = q.toLowerCase();
+  return champions.filter(c =>
+    c.nameZh.includes(q) ||
+    c.nameEn.toLowerCase().includes(lq) ||
+    c.key.toLowerCase().includes(lq)
+  ).slice(0, 8);
+}
+
+function searchAugs(q, champ) {
+  if (!q.trim() || !champ) return [];
+  const lq = q.toLowerCase();
+  return champ.augments.filter(a =>
+    a.nameZh.includes(q) ||
+    (a.nameEn && a.nameEn.toLowerCase().includes(lq))
+  ).slice(0, 8);
+}
+
+// Generic dropdown renderer
+// items: [{label, sub, tier, data}]
+// onPick: fn(data)
+function showDropdown(el, items, onPick) {
+  if (!items.length) { el.style.display = 'none'; return; }
+  el.innerHTML = items.map(it => `
+    <div class="sug-item">
+      ${tb(it.tier)}
+      <div>
+        <div>${it.label}</div>
+        <div class="sug-sub">${it.sub}</div>
+      </div>
+    </div>
+  `).join('');
+  el.querySelectorAll('.sug-item').forEach((row, i) =>
+    row.addEventListener('mousedown', e => { e.preventDefault(); onPick(items[i].data); })
+  );
+  el.style.display = 'block';
+}
+
+function hideDropdown(el) { el.style.display = 'none'; }
+
+function setupChampionInput(input, sugEl, onPick) {
+  input.addEventListener('input', () => {
+    const results = searchChamps(input.value);
+    showDropdown(sugEl,
+      results.map(c => ({ label: c.nameZh, sub: `${c.nameEn} · #${c.rank}`, tier: c.tier, data: c })),
+      c => { onPick(c); hideDropdown(sugEl); }
+    );
+  });
+  input.addEventListener('blur', () => setTimeout(() => hideDropdown(sugEl), 150));
+}
+
+// ─── Compare Tab ──────────────────────────────────────────────────────────────
+function bindCompareSearch() {
+  const input  = document.getElementById('cmp-input');
+  const sugEl  = document.getElementById('cmp-sug');
+  setupChampionInput(input, sugEl, champ => {
+    input.value = '';
+    addToCompare(champ);
+  });
+}
+
+function addToCompare(champ) {
+  if (cmpList.find(c => c.key === champ.key)) return;
+  cmpList.push(champ);
+  renderCompareTags();
+  renderCompareResult();
+}
+
+function removeFromCompare(key) {
+  cmpList = cmpList.filter(c => c.key !== key);
+  renderCompareTags();
+  renderCompareResult();
+}
+
+function renderCompareTags() {
+  document.getElementById('cmp-tags').innerHTML = cmpList.map(c => `
+    <span class="tag">
+      ${tb(c.tier)}
+      <span>${c.nameZh}</span>
+      <span class="rm" onclick="removeFromCompare('${c.key}')">×</span>
+    </span>
+  `).join('');
+}
+
+function renderCompareResult() {
+  const el = document.getElementById('cmp-result');
+  if (cmpList.length < 2) { el.innerHTML = ''; return; }
+
+  const sorted = [...cmpList].sort((a, b) => {
+    const d = TIER_ORD[a.tier] - TIER_ORD[b.tier];
+    return d !== 0 ? d : a.rank - b.rank;
+  });
+  const best = sorted[0];
+
+  const rows = sorted.map((c, i) => `
+    <div class="result-row ${i === 0 ? 'top' : ''}">
+      <span class="rank">${i === 0 ? '👑' : i + 1}</span>
+      ${tb(c.tier)}
+      <div class="names">
+        <div class="zh">${c.nameZh}</div>
+        <div class="en">${c.nameEn}</div>
+      </div>
+      <span class="global-rank">全服 #${c.rank}</span>
+    </div>
+  `).join('');
+
+  el.innerHTML = `
+    <div class="card">
+      <h2>比較結果</h2>
+      <div class="result-list">${rows}</div>
+      <div style="margin-top:12px;font-size:.875rem;color:var(--muted)">
+        ✅ 推薦選 <strong style="color:var(--text)">${best.nameZh}</strong>
+        — ${best.tier} 階，全服 #${best.rank}
+      </div>
+    </div>
+  `;
+}
+
+// ─── Augment Advisor Tab ───────────────────────────────────────────────────────
+function bindAdvChampSearch() {
+  const input = document.getElementById('adv-champ-input');
+  const sugEl = document.getElementById('adv-champ-sug');
+  setupChampionInput(input, sugEl, champ => {
+    selectAdvChamp(champ);
+    input.value = champ.nameZh;
+  });
+}
+
+function selectAdvChamp(champ) {
+  advChamp = champ;
+  advAugs  = [null, null, null];
+
+  document.getElementById('adv-champ-info').innerHTML = `
+    <div class="champ-strip">
+      ${tb(champ.tier)}
+      <div class="info">
+        <div><strong>${champ.nameZh}</strong> / ${champ.nameEn}</div>
+        <div class="sub">${champ.tier} 階 · 全服排名 #${champ.rank}</div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('adv-aug-card').style.display = 'block';
+  document.getElementById('adv-result').innerHTML = '';
+  document.getElementById('adv-err').style.display = 'none';
+
+  // Reset augment inputs
+  for (let i = 0; i < 3; i++) {
+    document.getElementById(`aug-inp-${i}`).value = '';
+    document.getElementById(`aug-sug-${i}`).style.display = 'none';
+  }
+}
+
+// ─── Augment slot handlers (called via inline onfocus/oninput/onblur) ─────────
+function augShow(idx) {
+  if (!advChamp) return;
+  const results = advChamp.augments.slice(0, 12);
+  renderAugSuggestions(idx, results);
+}
+
+function augFilter(idx) {
+  if (!advChamp) return;
+  const inp = document.getElementById(`aug-inp-${idx}`);
+  // Clear locked selection if user changed the text
+  if (advAugs[idx] && inp.value !== advAugs[idx].nameZh) advAugs[idx] = null;
+  const q = inp.value.trim();
+  const results = q ? searchAugs(q, advChamp) : advChamp.augments.slice(0, 12);
+  renderAugSuggestions(idx, results);
+}
+
+function augHide(idx) {
+  setTimeout(() => {
+    document.getElementById(`aug-sug-${idx}`).style.display = 'none';
+  }, 200);
+}
+
+function augPick(event, idx, dataIdx) {
+  event.preventDefault();
+  const sugEl = document.getElementById(`aug-sug-${idx}`);
+  const aug = sugEl._list[dataIdx];
+  advAugs[idx] = aug;
+  document.getElementById(`aug-inp-${idx}`).value = aug.nameZh;
+  sugEl.style.display = 'none';
+}
+
+function renderAugSuggestions(idx, augs) {
+  const sugEl = document.getElementById(`aug-sug-${idx}`);
+  if (!augs.length) { sugEl.style.display = 'none'; return; }
+  sugEl._list = augs;
+  sugEl.innerHTML = augs.map((a, i) => `
+    <div class="sug-item" onmousedown="augPick(event,${idx},${i})">
+      ${tb(a.tier)}
+      <div>
+        <div>${a.nameZh}</div>
+        <div class="sug-sub">${a.nameEn || ''} · ${a.tier} · ${(a.performance || 0).toFixed(1)} 分</div>
+      </div>
+    </div>
+  `).join('');
+  sugEl.style.display = 'block';
+}
+
+// ─── Decision Logic ───────────────────────────────────────────────────────────
+function decide(augs) {
+  // sort: lower TIER_ORD first; ties broken by higher performance
+  const sorted = [...augs].sort((a, b) => {
+    const d = TIER_ORD[a.tier] - TIER_ORD[b.tier];
+    return d !== 0 ? d : b.performance - a.performance;
+  });
+
+  const best  = sorted[0];
+  const rest  = sorted.slice(1);
+
+  // E-tier high-score exception
+  const eHighScore = best.tier === 'E' && best.performance > 100;
+
+  // Close call: same tier and within 5 pts
+  const closeCall =
+    rest.length > 0 &&
+    rest[0].tier === best.tier &&
+    Math.abs(best.performance - rest[0].performance) <= 5;
+
+  // Big gap: best tier is 2+ steps above second best
+  const bigGap =
+    rest.length > 0 &&
+    TIER_ORD[rest[0].tier] - TIER_ORD[best.tier] >= 2;
+
+  return { sorted, best, rest, eHighScore, closeCall, bigGap };
+}
+
+function runAnalysis() {
+  const errEl = document.getElementById('adv-err');
+  errEl.style.display = 'none';
+
+  const filled = advAugs.filter(Boolean);
+  if (filled.length < 2) {
+    errEl.textContent = '請至少從下拉選單選擇 2 個增強選項。';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const { sorted, best, rest, eHighScore, closeCall, bigGap } = decide(filled);
+  renderAugResult(sorted, best, rest, eHighScore, closeCall, bigGap);
+}
+
+function renderAugResult(sorted, best, rest, eHighScore, closeCall, bigGap) {
+  const rows = sorted.map((a, i) => {
+    const icon = i === 0 ? '✅' : '🎲';
+    return `
+      <div class="aug-row">
+        <span>${icon}</span>
+        ${tb(a.tier)}
+        <div class="aug-names">
+          <div>${a.nameZh}</div>
+          <div class="en">${a.nameEn}</div>
+        </div>
+        <span class="score">${a.performance.toFixed(1)} 分</span>
+      </div>
+    `;
+  }).join('');
+
+  let mainClass, mainText, rollText, reasonText;
+
+  if (closeCall) {
+    mainClass = 'rec-both';
+    const tie = sorted.slice(0, 2);
+    mainText = `🤔 難選：${tie[0].nameZh} 或 ${tie[1].nameZh}`;
+    rollText  = rest.length > 1
+      ? `骰掉：${rest.slice(1).map(a => a.nameZh).join('、')}`
+      : '';
+    reasonText = `兩者同為 ${best.tier} 階，分數相近` +
+      `（${tie[0].performance.toFixed(1)} vs ${tie[1].performance.toFixed(1)}），兩個都可以選。`;
+  } else {
+    mainClass = 'rec-keep';
+    const note = eHighScore ? '（E 階但高分，值得留）' : '';
+    mainText = `留下 ${best.nameZh} ${note}`;
+    rollText  = rest.length > 0 ? `骰掉：${rest.map(a => a.nameZh).join('、')}` : '';
+
+    if (eHighScore) {
+      reasonText = `${best.nameZh} 雖然是通用增強（E 階），但評分 ${best.performance.toFixed(1)} > 100，仍然值得選。`;
+    } else if (bigGap) {
+      reasonText = `${best.nameZh} 為 ${best.tier} 階（${best.performance.toFixed(1)} 分），與其他選項差距明顯，直接留下。`;
+    } else {
+      reasonText = `${best.nameZh} 為 ${best.tier} 階（${best.performance.toFixed(1)} 分），是本輪最佳選擇。`;
+    }
+  }
+
+  document.getElementById('adv-result').innerHTML = `
+    <div class="card">
+      <h2>增強建議</h2>
+      <div class="result-list">${rows}</div>
+      <div class="rec-box">
+        <div class="rec-label">建議</div>
+        <div class="rec-main ${mainClass}">${mainText}</div>
+        ${rollText ? `<div class="rec-roll">${rollText}</div>` : ''}
+        <div class="rec-reason">${reasonText}</div>
+      </div>
+    </div>
+  `;
+}
+
+init();
+</script>
+</body>
+</html>
