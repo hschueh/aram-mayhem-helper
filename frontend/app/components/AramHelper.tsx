@@ -358,6 +358,80 @@ function AugmentInput({
   );
 }
 
+// ─── Tier list panel ─────────────────────────────────────────────────────────
+const TIERS = ["S", "A", "B", "C", "D", "E"] as const;
+
+function TierListPanel({
+  champions,
+  onSelect,
+  highlight,
+}: {
+  champions: Champion[];
+  onSelect?: (c: Champion) => void;
+  highlight?: string; // champion key to highlight
+}) {
+  const byTier = useMemo(() => {
+    const map = new Map<string, Champion[]>();
+    for (const t of TIERS) map.set(t, []);
+    for (const c of champions) {
+      const list = map.get(c.tier);
+      if (list) list.push(c);
+    }
+    return map;
+  }, [champions]);
+
+  return (
+    <Card>
+      <CardTitle>英雄強度一覽</CardTitle>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {TIERS.map((tier) => {
+          const list = byTier.get(tier) ?? [];
+          if (list.length === 0) return null;
+          return (
+            <div key={tier} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+              <div style={{ flexShrink: 0, paddingTop: 2 }}>
+                <TierBadge tier={tier} />
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                {list.map((c) => (
+                  <span
+                    key={c.key}
+                    onClick={() => onSelect?.(c)}
+                    title={`${c.nameEn} · #${c.rank}`}
+                    style={{
+                      fontSize: 12,
+                      padding: "2px 8px",
+                      borderRadius: 4,
+                      background:
+                        highlight === c.key
+                          ? "rgba(88,166,255,.2)"
+                          : "var(--sf2)",
+                      border: `1px solid ${
+                        highlight === c.key ? "var(--accent)" : "var(--border)"
+                      }`,
+                      color: highlight === c.key ? "var(--accent)" : "var(--text)",
+                      cursor: onSelect ? "pointer" : "default",
+                      transition: "background .1s",
+                      whiteSpace: "nowrap",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (onSelect)
+                        (e.currentTarget as HTMLSpanElement).style.background =
+                          "var(--sf2)";
+                    }}
+                  >
+                    {c.nameZh}
+                  </span>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </Card>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function AramHelper({ champions }: { champions: Champion[] }) {
   const [phase, setPhase] = useState<"select" | "rounds">("select");
@@ -530,6 +604,11 @@ export default function AramHelper({ champions }: { champions: Champion[] }) {
             )}
           </Card>
 
+          <TierListPanel
+            champions={champions}
+            onSelect={addToPool}
+          />
+
           {poolSorted.length >= 1 && (
             <Card>
               <CardTitle>比較結果 — 點「選這隻」確認你選的英雄</CardTitle>
@@ -682,6 +761,11 @@ export default function AramHelper({ champions }: { champions: Champion[] }) {
               )}
             </Card>
           )}
+
+          <TierListPanel
+            champions={champions}
+            highlight={confirmedChamp.key}
+          />
 
           {/* Current round inputs */}
           <Card>
