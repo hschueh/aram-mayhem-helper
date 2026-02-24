@@ -358,6 +358,69 @@ function AugmentInput({
   );
 }
 
+// ─── Augment tier panel (for confirmed champion) ──────────────────────────────
+function AugmentTierPanel({
+  champion,
+  picked,
+}: {
+  champion: Champion;
+  picked: Augment[];
+}) {
+  const pickedNames = new Set(picked.map((a) => a.nameZh));
+
+  const byTier = useMemo(() => {
+    const map = new Map<string, Augment[]>();
+    for (const t of TIERS) map.set(t, []);
+    for (const a of champion.augments) {
+      const list = map.get(a.tier);
+      if (list) list.push(a);
+    }
+    return map;
+  }, [champion]);
+
+  return (
+    <Card>
+      <CardTitle>{champion.nameZh} 增強一覽</CardTitle>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {TIERS.map((tier) => {
+          const list = byTier.get(tier) ?? [];
+          if (list.length === 0) return null;
+          return (
+            <div key={tier} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+              <div style={{ flexShrink: 0, paddingTop: 2 }}>
+                <TierBadge tier={tier} />
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                {list.map((a) => (
+                  <span
+                    key={a.id}
+                    title={`${a.nameEn} · ${a.performance.toFixed(1)} 分`}
+                    style={{
+                      fontSize: 12,
+                      padding: "2px 8px",
+                      borderRadius: 4,
+                      background: pickedNames.has(a.nameZh)
+                        ? "#2ed57322"
+                        : "var(--sf2)",
+                      border: `1px solid ${
+                        pickedNames.has(a.nameZh) ? "#2ed57366" : "var(--border)"
+                      }`,
+                      color: pickedNames.has(a.nameZh) ? "#2ed573" : "var(--text)",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {a.nameZh}
+                  </span>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </Card>
+  );
+}
+
 // ─── Tier list panel ─────────────────────────────────────────────────────────
 const TIERS = ["S", "A", "B", "C", "D", "E"] as const;
 
@@ -604,11 +667,6 @@ export default function AramHelper({ champions }: { champions: Champion[] }) {
             )}
           </Card>
 
-          <TierListPanel
-            champions={champions}
-            onSelect={addToPool}
-          />
-
           {poolSorted.length >= 1 && (
             <Card>
               <CardTitle>比較結果 — 點「選這隻」確認你選的英雄</CardTitle>
@@ -664,6 +722,8 @@ export default function AramHelper({ champions }: { champions: Champion[] }) {
               ))}
             </Card>
           )}
+
+          <TierListPanel champions={champions} onSelect={addToPool} />
         </div>
       )}
 
@@ -762,11 +822,6 @@ export default function AramHelper({ champions }: { champions: Champion[] }) {
             </Card>
           )}
 
-          <TierListPanel
-            champions={champions}
-            highlight={confirmedChamp.key}
-          />
-
           {/* Current round inputs */}
           <Card>
             <CardTitle>第 {roundHistory.length + 1} 輪增強選項</CardTitle>
@@ -800,6 +855,8 @@ export default function AramHelper({ champions }: { champions: Champion[] }) {
 
           {/* Recommendation */}
           {currentRec && <AugResult result={currentRec} onConfirmPick={confirmPick} />}
+
+          <AugmentTierPanel champion={confirmedChamp} picked={pickedSoFar} />
         </div>
       )}
     </div>
