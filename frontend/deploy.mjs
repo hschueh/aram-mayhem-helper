@@ -51,9 +51,12 @@ async function main() {
 
   // Step 1: Create publish
   console.log("Creating publish...");
+  const token = process.env.HERE_NOW_TOKEN;
+  const authHeaders = token ? { "Authorization": `Bearer ${token}` } : {};
+
   const createRes = await fetch("https://here.now/api/v1/publish", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders },
     body: JSON.stringify({
       files: files.map(({ path, size, contentType }) => ({ path, size, contentType })),
       viewer: { title: "ARAM: 大亂鬥 Helper", description: "ARAM augment advisor" },
@@ -69,25 +72,23 @@ async function main() {
   console.log(`Slug: ${slug}`);
   console.log(`URL:  ${siteUrl}`);
 
-  // Step 2: Upload files in parallel
+  // Step 2: Upload files sequentially
   console.log("Uploading files...");
-  await Promise.all(
-    upload.uploads.map(async ({ path, method, url, headers }) => {
-      const abs = files.find((f) => f.path === path)?.abs;
-      if (!abs) throw new Error(`No local file for path: ${path}`);
-      const body = readFileSync(abs);
-      const res = await fetch(url, { method, headers, body });
-      if (!res.ok) throw new Error(`Upload failed for ${path}: ${res.status}`);
-      process.stdout.write(".");
-    })
-  );
+  for (const { path, method, url, headers } of upload.uploads) {
+    const abs = files.find((f) => f.path === path)?.abs;
+    if (!abs) throw new Error(`No local file for path: ${path}`);
+    const body = readFileSync(abs);
+    const res = await fetch(url, { method, headers, body });
+    if (!res.ok) throw new Error(`Upload failed for ${path}: ${res.status}`);
+    process.stdout.write(".");
+  }
   console.log("\nAll files uploaded");
 
   // Step 3: Finalize
   console.log("Finalizing...");
   const finalRes = await fetch(upload.finalizeUrl, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders },
     body: JSON.stringify({ versionId: upload.versionId }),
   });
 
