@@ -362,11 +362,18 @@ function AugmentInput({
 function AugmentTierPanel({
   champion,
   picked,
+  currentOptions,
+  onToggle,
 }: {
   champion: Champion;
   picked: Augment[];
+  currentOptions?: (Augment | null)[];
+  onToggle?: (a: Augment) => void;
 }) {
   const pickedNames = new Set(picked.map((a) => a.nameZh));
+  const currentNames = new Set(
+    (currentOptions ?? []).filter(Boolean).map((a) => a!.nameZh)
+  );
 
   const byTier = useMemo(() => {
     const map = new Map<string, Augment[]>();
@@ -391,27 +398,45 @@ function AugmentTierPanel({
                 <TierBadge tier={tier} />
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                {list.map((a) => (
-                  <span
-                    key={a.id}
-                    title={`${a.nameEn} · ${a.performance.toFixed(1)} 分`}
-                    style={{
-                      fontSize: 12,
-                      padding: "2px 8px",
-                      borderRadius: 4,
-                      background: pickedNames.has(a.nameZh)
-                        ? "#2ed57322"
-                        : "var(--sf2)",
-                      border: `1px solid ${
-                        pickedNames.has(a.nameZh) ? "#2ed57366" : "var(--border)"
-                      }`,
-                      color: pickedNames.has(a.nameZh) ? "#2ed573" : "var(--text)",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {a.nameZh}
-                  </span>
-                ))}
+                {list.map((a) => {
+                  const isHistory = pickedNames.has(a.nameZh);
+                  const isCurrent = currentNames.has(a.nameZh);
+                  return (
+                    <span
+                      key={a.id}
+                      onClick={() => !isHistory && onToggle?.(a)}
+                      title={`${a.nameEn} · ${a.performance.toFixed(1)} 分`}
+                      style={{
+                        fontSize: 12,
+                        padding: "2px 8px",
+                        borderRadius: 4,
+                        cursor: isHistory ? "default" : onToggle ? "pointer" : "default",
+                        whiteSpace: "nowrap",
+                        transition: "background .1s, border-color .1s",
+                        background: isHistory
+                          ? "#2ed57322"
+                          : isCurrent
+                          ? "rgba(88,166,255,.2)"
+                          : "var(--sf2)",
+                        border: `1px solid ${
+                          isHistory
+                            ? "#2ed57366"
+                            : isCurrent
+                            ? "var(--accent)"
+                            : "var(--border)"
+                        }`,
+                        color: isHistory
+                          ? "#2ed573"
+                          : isCurrent
+                          ? "var(--accent)"
+                          : "var(--text)",
+                        opacity: isHistory ? 0.6 : 1,
+                      }}
+                    >
+                      {a.nameZh}
+                    </span>
+                  );
+                })}
               </div>
             </div>
           );
@@ -563,6 +588,16 @@ export default function AramHelper({ champions }: { champions: Champion[] }) {
     setAugError("");
     const pickedSoFar = roundHistory.map((r) => r.picked);
     setCurrentRec(decide(filled, pickedSoFar));
+  }
+
+  function toggleAugFromPanel(aug: Augment) {
+    const existingIdx = currentOptions.findIndex((a) => a?.nameZh === aug.nameZh);
+    if (existingIdx !== -1) {
+      setOpt(existingIdx as 0 | 1 | 2, null);
+      return;
+    }
+    const emptyIdx = currentOptions.findIndex((a) => a === null);
+    if (emptyIdx !== -1) setOpt(emptyIdx as 0 | 1 | 2, aug);
   }
 
   function confirmPick(aug: Augment) {
@@ -856,7 +891,12 @@ export default function AramHelper({ champions }: { champions: Champion[] }) {
           {/* Recommendation */}
           {currentRec && <AugResult result={currentRec} onConfirmPick={confirmPick} />}
 
-          <AugmentTierPanel champion={confirmedChamp} picked={pickedSoFar} />
+          <AugmentTierPanel
+            champion={confirmedChamp}
+            picked={pickedSoFar}
+            currentOptions={currentOptions}
+            onToggle={toggleAugFromPanel}
+          />
         </div>
       )}
     </div>
