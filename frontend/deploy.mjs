@@ -54,8 +54,9 @@ async function main() {
   const token = process.env.HERE_NOW_TOKEN;
   const authHeaders = token ? { "Authorization": `Bearer ${token}` } : {};
 
-  const createRes = await fetch("https://here.now/api/v1/publish", {
-    method: "POST",
+  const SLUG = "lunar-monsoon-4r2z";
+  const createRes = await fetch(`https://here.now/api/v1/publish/${SLUG}`, {
+    method: "PUT",
     headers: { "Content-Type": "application/json", ...authHeaders },
     body: JSON.stringify({
       files: files.map(({ path, size, contentType }) => ({ path, size, contentType })),
