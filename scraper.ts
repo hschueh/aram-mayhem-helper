@@ -156,7 +156,16 @@ async function fetchScripts(context: BrowserContext, url: string): Promise<strin
   const page = await context.newPage();
   try {
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
-    await page.waitForTimeout(3000);
+    // Wait until table rows are real (not skeletons). The augment page renders a
+    // table of augments; if we grab scripts before hydration we get an empty parse.
+    await page.waitForFunction(
+      () => {
+        const rows = document.querySelectorAll('table tbody tr');
+        return rows.length > 0 && !(rows[0] as HTMLElement).querySelector?.('.animate-pulse');
+      },
+      { timeout: 25000 }
+    ).catch(() => { /* fall through; parser will surface the failure */ });
+    await page.waitForTimeout(1500);
     return await page.evaluate(() =>
       Array.from(document.querySelectorAll('script'))
         .map((s) => (s as HTMLScriptElement).innerText)
@@ -165,6 +174,10 @@ async function fetchScripts(context: BrowserContext, url: string): Promise<strin
   } finally {
     await page.close();
   }
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function fetchMainPage(
@@ -252,20 +265,34 @@ async function scrape() {
 
     const champKeys = zhMain.champions.map((c) => c.key);
 
+    const MAX_ATTEMPTS = 4;
     const champAugResults: ChampionAugmentData[] = await mapConcurrent(
       champKeys,
-      10,
+      5,
       async (key, idx) => {
         const url = `https://op.gg/zh-tw/lol/modes/aram-mayhem/${key}/augments`;
-        try {
-          const scripts = await fetchScripts(ctxZh, url);
-          const augments = parseChampionAugments(scripts);
-          process.stdout.write(`\r  Progress: ${idx + 1}/${champKeys.length} (${key.padEnd(16)})    `);
-          return { championKey: key, augments };
-        } catch (e) {
-          process.stdout.write(`\r  [WARN] Failed ${key}: ${(e as Error).message.slice(0, 40)}\n`);
-          return { championKey: key, augments: [] };
+        let lastErr = '';
+        for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+          try {
+            const scripts = await fetchScripts(ctxZh, url);
+            const augments = parseChampionAugments(scripts);
+            if (augments.length > 0) {
+              process.stdout.write(`\r  Progress: ${idx + 1}/${champKeys.length} (${key.padEnd(16)})    `);
+              return { championKey: key, augments };
+            }
+            lastErr = 'empty parse';
+          } catch (e) {
+            lastErr = (e as Error).message.slice(0, 60);
+          }
+          // Backoff before retry: 2s, 5s, 10s
+          if (attempt < MAX_ATTEMPTS) {
+            const backoff = [2000, 5000, 10000][attempt - 1];
+            process.stdout.write(`\r  [retry ${attempt}/${MAX_ATTEMPTS - 1}] ${key} (${lastErr}), waiting ${backoff}ms\n`);
+            await sleep(backoff);
+          }
         }
+        process.stdout.write(`\r  [WARN] Gave up on ${key} after ${MAX_ATTEMPTS} attempts: ${lastErr}\n`);
+        return { championKey: key, augments: [] };
       }
     );
     console.log('\n  Done.');
