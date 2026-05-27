@@ -32,6 +32,35 @@ interface ChampionAugmentData {
   augments: RawAugment[];
 }
 
+// ── Abilities + build (from /build page) ──
+interface Ability {
+  name: string;
+  desc: string;
+  image: string;
+}
+interface Spell extends Ability {
+  key: string; // Q / W / E / R
+}
+interface AbilitiesData {
+  passive: Ability;
+  spells: Spell[];
+}
+interface BuildItems {
+  starter: string[][];
+  boots: string[][];
+  core: string[][];
+}
+interface BuildData {
+  summonerSpells: string[][];
+  skillOrderNames: string[];
+  items: BuildItems;
+}
+interface ChampionBuildData {
+  championKey: string;
+  abilities: AbilitiesData | null;
+  build: BuildData | null;
+}
+
 // ──────────────────────────────────────────────
 // Tier labels
 // ──────────────────────────────────────────────
@@ -148,6 +177,77 @@ function extractJsonArray(str: string, start: number): string {
   return str.slice(start, end + 1);
 }
 
+/** Parse champion abilities (passive + Q/W/E/R) from /build page __next_f scripts.
+ *  The payload embeds a clean object: {"passive":{name,description,image_url},"data":[{key,name,description,image_url}]} */
+function parseAbilities(scripts: string[]): AbilitiesData | null {
+  for (const script of scripts) {
+    const match = script.match(/self\.__next_f\.push\(\[1,"([\s\S]+?)"\]\)\s*$/);
+    if (!match) continue;
+
+    let raw: string;
+    try { raw = JSON.parse(`"${match[1]}"`); } catch { continue; }
+
+    const pIdx = raw.indexOf('"passive":{"name"');
+    if (pIdx === -1) continue;
+
+    // The enclosing object opens with the '{' immediately before "passive".
+    const objStart = raw.lastIndexOf('{', pIdx);
+    if (objStart === -1) continue;
+    try {
+      const obj = JSON.parse(extractJsonArray(raw, objStart));
+      if (!obj?.passive?.name || !Array.isArray(obj.data)) continue;
+      return {
+        passive: {
+          name: obj.passive.name,
+          desc: (obj.passive.description ?? '').trim(),
+          image: obj.passive.image_url ?? '',
+        },
+        spells: obj.data
+          .filter((s: any) => s?.key && s?.name)
+          .map((s: any) => ({
+            key: s.key,
+            name: s.name,
+            desc: (s.description ?? '').trim(),
+            image: s.image_url ?? '',
+          })),
+      };
+    } catch { continue; }
+  }
+  return null;
+}
+
+/** Dedupe rows (op.gg renders responsive duplicate tables) while preserving order. */
+function dedupeRows(rows: string[][]): string[][] {
+  const seen = new Set<string>();
+  const out: string[][] = [];
+  for (const r of rows) {
+    if (!r.length) continue;
+    const k = r.join('|');
+    if (!seen.has(k)) { seen.add(k); out.push(r); }
+  }
+  return out;
+}
+
+function normalizeBuild(raw: {
+  spells: string[][]; skill: string[][]; starter: string[][]; boots: string[][]; core: string[][];
+}): BuildData | null {
+  const skillRows = dedupeRows(raw.skill);
+  const build: BuildData = {
+    summonerSpells: dedupeRows(raw.spells),
+    skillOrderNames: skillRows[0] ?? [],
+    items: {
+      starter: dedupeRows(raw.starter),
+      boots: dedupeRows(raw.boots),
+      core: dedupeRows(raw.core),
+    },
+  };
+  // If we got essentially nothing, treat as missing.
+  const hasAny =
+    build.summonerSpells.length || build.skillOrderNames.length ||
+    build.items.starter.length || build.items.boots.length || build.items.core.length;
+  return hasAny ? build : null;
+}
+
 // ──────────────────────────────────────────────
 // Fetch helpers
 // ──────────────────────────────────────────────
@@ -178,6 +278,68 @@ async function fetchScripts(context: BrowserContext, url: string): Promise<strin
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** Fetch a champion's /build page and extract abilities (from payload) + build (from DOM). */
+async function fetchBuildPage(
+  context: BrowserContext,
+  key: string
+): Promise<{ abilities: AbilitiesData | null; build: BuildData | null }> {
+  const url = `https://op.gg/zh-tw/lol/modes/aram-mayhem/${key}/build`;
+  const page = await context.newPage();
+  try {
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    // Wait until the build tables (skill order / core build) have rendered.
+    await page.waitForFunction(
+      () =>
+        Array.from(document.querySelectorAll('table tr')).some((tr) =>
+          /核心組建|技能順序/.test(tr.textContent || '')
+        ),
+      { timeout: 25000 }
+    ).catch(() => { /* fall through; parser will surface the failure */ });
+    await page.waitForTimeout(1200);
+
+    // 1) Abilities from __next_f payload
+    const scripts: string[] = await page.evaluate(() =>
+      Array.from(document.querySelectorAll('script'))
+        .map((s) => (s as HTMLScriptElement).innerText)
+        .filter((t) => t.includes('__next_f'))
+    );
+    const abilities = parseAbilities(scripts);
+
+    // 2) Build (spells / skill order / items) from the rendered tables.
+    //    Each section is a <table> whose first row is a localized label; data
+    //    rows contain item/spell icons whose alt text is the localized name.
+    const rawBuild = await page.evaluate(() => {
+      const buckets: Record<string, string[][]> = {
+        spells: [], skill: [], starter: [], boots: [], core: [],
+      };
+      for (const table of Array.from(document.querySelectorAll('table'))) {
+        const trs = Array.from(table.querySelectorAll('tr'));
+        if (!trs.length) continue;
+        const label = (trs[0].textContent || '').trim();
+        let bucket: keyof typeof buckets | null = null;
+        if (label.includes('召喚師技能')) bucket = 'spells';
+        else if (label.includes('技能順序')) bucket = 'skill';
+        else if (label.includes('起始裝備')) bucket = 'starter';
+        else if (label.includes('鞋子')) bucket = 'boots';
+        else if (label.includes('核心')) bucket = 'core';
+        else continue;
+        for (const tr of trs) {
+          const alts = Array.from(tr.querySelectorAll('img'))
+            .map((im) => (im as HTMLImageElement).alt)
+            .filter(Boolean);
+          if (alts.length) buckets[bucket].push(alts);
+        }
+      }
+      return buckets as { spells: string[][]; skill: string[][]; starter: string[][]; boots: string[][]; core: string[][] };
+    });
+    const build = normalizeBuild(rawBuild);
+
+    return { abilities, build };
+  } finally {
+    await page.close();
+  }
 }
 
 async function fetchMainPage(
@@ -263,7 +425,13 @@ async function scrape() {
     // ── Step 2: Load each champion's /augments page ──
     console.log(`\n[Step 2] Loading augment pages for ${zhMain.champions.length} champions (concurrency=10)...`);
 
-    const champKeys = zhMain.champions.map((c) => c.key);
+    let champKeys = zhMain.champions.map((c) => c.key);
+    // Dev hook: SCRAPE_LIMIT=N processes only the first N champions (faster iteration).
+    if (process.env.SCRAPE_LIMIT) {
+      const n = Number(process.env.SCRAPE_LIMIT);
+      champKeys = champKeys.slice(0, n);
+      console.log(`  [SCRAPE_LIMIT] restricted to ${champKeys.length} champions: ${champKeys.join(', ')}`);
+    }
 
     const MAX_ATTEMPTS = 4;
     const champAugResults: ChampionAugmentData[] = await mapConcurrent(
@@ -297,13 +465,48 @@ async function scrape() {
     );
     console.log('\n  Done.');
 
+    // ── Step 2b: Load each champion's /build page (abilities + item/skill build) ──
+    console.log(`\n[Step 2b] Loading build pages for ${champKeys.length} champions (concurrency=5)...`);
+
+    const champBuildResults: ChampionBuildData[] = await mapConcurrent(
+      champKeys,
+      5,
+      async (key, idx) => {
+        let lastErr = '';
+        for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+          try {
+            const { abilities, build } = await fetchBuildPage(ctxZh, key);
+            if (abilities || build) {
+              process.stdout.write(`\r  Progress: ${idx + 1}/${champKeys.length} (${key.padEnd(16)})    `);
+              return { championKey: key, abilities, build };
+            }
+            lastErr = 'empty parse';
+          } catch (e) {
+            lastErr = (e as Error).message.slice(0, 60);
+          }
+          if (attempt < MAX_ATTEMPTS) {
+            const backoff = [2000, 5000, 10000][attempt - 1];
+            process.stdout.write(`\r  [retry ${attempt}/${MAX_ATTEMPTS - 1}] ${key} build (${lastErr}), waiting ${backoff}ms\n`);
+            await sleep(backoff);
+          }
+        }
+        process.stdout.write(`\r  [WARN] Gave up on ${key} build after ${MAX_ATTEMPTS} attempts: ${lastErr}\n`);
+        return { championKey: key, abilities: null, build: null };
+      }
+    );
+    console.log('\n  Done.');
+
     await ctxZh.close();
     await ctxEn.close();
 
     // ── Step 3: Build final output ──
     console.log('\n[Step 3] Building output...');
 
-    const sortedChampions = [...zhMain.champions].sort((a, b) => a.rank - b.rank);
+    const isTest = !!process.env.SCRAPE_LIMIT;
+    const limitSet = isTest ? new Set(champKeys) : null;
+    const sortedChampions = [...zhMain.champions]
+      .sort((a, b) => a.rank - b.rank)
+      .filter((c) => !limitSet || limitSet.has(c.key));
 
     const output = {
       scrapedAt: new Date().toISOString(),
@@ -330,6 +533,21 @@ async function scrape() {
             };
           });
 
+        const buildResult = champBuildResults.find((r) => r.championKey === zh.key);
+        const abilities = buildResult?.abilities ?? null;
+        const rawBuild = buildResult?.build ?? null;
+
+        // Derive skill leveling priority (keys) from the ability names op.gg shows.
+        const nameToKey = new Map((abilities?.spells ?? []).map((s) => [s.name, s.key]));
+        const build = rawBuild
+          ? {
+              summonerSpells: rawBuild.summonerSpells,
+              skillOrder: rawBuild.skillOrderNames.map((n) => nameToKey.get(n) ?? '?'),
+              skillOrderNames: rawBuild.skillOrderNames,
+              items: rawBuild.items,
+            }
+          : null;
+
         return {
           rank: zh.rank,
           key: zh.key,
@@ -338,17 +556,19 @@ async function scrape() {
           tier: champTierLabel(zh.tier),
           tierRaw: zh.tier,
           augments,
+          abilities,
+          build,
         };
       }),
     };
 
     // ── Save JSON ──
-    const outPath = path.join(__dirname, 'aram-mayhem-data.json');
+    const outPath = path.join(__dirname, isTest ? 'aram-mayhem-data.test.json' : 'aram-mayhem-data.json');
     fs.writeFileSync(outPath, JSON.stringify(output, null, 2), 'utf-8');
     console.log(`\nSaved JSON → ${outPath}`);
 
     // ── Write Champions.md ──
-    const mdDir = path.join(__dirname, 'champions');
+    const mdDir = path.join(__dirname, isTest ? 'champions-test' : 'champions');
     fs.mkdirSync(mdDir, { recursive: true });
 
     const tierGroups: Record<string, typeof output.champions> = { S: [], A: [], B: [], C: [], D: [] };
@@ -369,8 +589,10 @@ async function scrape() {
       }
       champsMd += '\n';
     }
-    fs.writeFileSync(path.join(__dirname, 'Champions.md'), champsMd, 'utf-8');
-    console.log('Saved Champions.md');
+    if (!isTest) {
+      fs.writeFileSync(path.join(__dirname, 'Champions.md'), champsMd, 'utf-8');
+      console.log('Saved Champions.md');
+    }
 
     // ── Write individual {key}.md files ──
     for (const c of output.champions) {
@@ -388,6 +610,47 @@ async function scrape() {
         }
       } else {
         md += `> 無增強資料\n`;
+      }
+
+      // ── 出裝 & 加點 ──
+      if (c.build) {
+        md += `\n## 出裝 & 加點 / Build\n\n`;
+        if (c.build.summonerSpells.length) {
+          const opts = c.build.summonerSpells.map((s) => s.join(' + ')).join(' ／ ');
+          md += `**召喚師技能**: ${opts}  \n`;
+        }
+        if (c.build.skillOrder.length) {
+          const order = c.build.skillOrder
+            .map((k, i) => `${k}${c.build!.skillOrderNames[i] ? `（${c.build!.skillOrderNames[i]}）` : ''}`)
+            .join(' > ');
+          md += `**技能加點 (主修順序)**: ${order}  \n`;
+        }
+        if (c.build.items.starter.length) {
+          md += `**起始裝備**: ${c.build.items.starter.map((r) => r.join(' + ')).join(' ／ ')}  \n`;
+        }
+        if (c.build.items.boots.length) {
+          md += `**鞋子**: ${c.build.items.boots.map((r) => r.join('')).join(' ／ ')}  \n`;
+        }
+        if (c.build.items.core.length) {
+          md += `\n**核心組建**:\n`;
+          c.build.items.core.forEach((path, i) => {
+            md += `${i + 1}. ${path.join(' → ')}\n`;
+          });
+        }
+      }
+
+      // ── 技能說明 ──
+      if (c.abilities) {
+        md += `\n## 技能說明 / Abilities\n\n`;
+        md += `**被動 — ${c.abilities.passive.name}**: ${c.abilities.passive.desc}\n\n`;
+        if (c.abilities.spells.length) {
+          md += `| 鍵 | 技能 | 說明 |\n`;
+          md += `|----|------|------|\n`;
+          for (const s of c.abilities.spells) {
+            const desc = s.desc.replace(/\n/g, ' ').replace(/\|/g, '\\|');
+            md += `| ${s.key} | ${s.name} | ${desc} |\n`;
+          }
+        }
       }
 
       fs.writeFileSync(path.join(mdDir, `${c.key}.md`), md, 'utf-8');
@@ -415,6 +678,17 @@ async function scrape() {
     console.log(`\nTotal: ${output.champions.length} champions`);
     const withAugs = output.champions.filter((c) => c.augments.length > 0).length;
     console.log(`Champions with augment data: ${withAugs}`);
+    const withAbilities = output.champions.filter((c) => c.abilities).length;
+    const withBuild = output.champions.filter((c) => c.build).length;
+    console.log(`Champions with ability data:  ${withAbilities}`);
+    console.log(`Champions with build data:    ${withBuild}`);
+
+    // ── Sync JSON into the frontend (page.tsx imports ../aram-mayhem-data.json) ──
+    const frontendJson = path.join(__dirname, 'frontend', 'aram-mayhem-data.json');
+    if (!isTest && fs.existsSync(path.dirname(frontendJson))) {
+      fs.copyFileSync(outPath, frontendJson);
+      console.log(`Synced JSON → ${frontendJson}`);
+    }
 
   } finally {
     await browser.close();

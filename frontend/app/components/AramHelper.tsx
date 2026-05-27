@@ -12,6 +12,16 @@ type Augment = {
   performance: number;
 };
 
+type Ability = { name: string; desc: string; image: string };
+type Spell = Ability & { key: string };
+type Abilities = { passive: Ability; spells: Spell[] };
+type Build = {
+  summonerSpells: string[][];
+  skillOrder: string[];
+  skillOrderNames: string[];
+  items: { starter: string[][]; boots: string[][]; core: string[][] };
+};
+
 type Champion = {
   rank: number;
   key: string;
@@ -19,6 +29,8 @@ type Champion = {
   nameEn: string;
   tier: string;
   augments: Augment[];
+  abilities?: Abilities | null;
+  build?: Build | null;
 };
 
 type RoundRecord = {
@@ -446,6 +458,234 @@ function AugmentTierPanel({
   );
 }
 
+// ─── Build & abilities panel ──────────────────────────────────────────────────
+const SKILL_COLOR: Record<string, string> = {
+  Q: "#58a6ff",
+  W: "#2ed573",
+  E: "#ffa502",
+  R: "#ff4757",
+};
+
+function Chip({ children }: { children: React.ReactNode }) {
+  return (
+    <span
+      style={{
+        fontSize: 12,
+        padding: "2px 8px",
+        borderRadius: 4,
+        background: "var(--sf2)",
+        border: "1px solid var(--border)",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+function BuildPanel({ champion }: { champion: Champion }) {
+  const [open, setOpen] = useState(false);
+  const { build, abilities } = champion;
+  if (!build && !abilities) return null;
+
+  const skillNameByKey = new Map(
+    (abilities?.spells ?? []).map((s) => [s.key, s.name])
+  );
+
+  return (
+    <Card>
+      <div
+        onClick={() => setOpen((o) => !o)}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          cursor: "pointer",
+          fontWeight: 600,
+          fontSize: 15,
+        }}
+      >
+        <span>📖 出裝 &amp; 技能</span>
+        <span style={{ color: "var(--muted)", fontSize: 13 }}>{open ? "收起 ▲" : "展開 ▼"}</span>
+      </div>
+
+      {open && (
+        <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 16 }}>
+          {build && (
+            <>
+              {build.summonerSpells.length > 0 && (
+                <Row label="召喚師技能">
+                  {build.summonerSpells.map((pair, i) => (
+                    <Chip key={i}>{pair.join(" + ")}</Chip>
+                  ))}
+                </Row>
+              )}
+
+              {build.skillOrder.length > 0 && (
+                <Row label="技能加點">
+                  <div style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
+                    {build.skillOrder.map((k, i) => (
+                      <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                        <span
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: 20,
+                            height: 20,
+                            borderRadius: 4,
+                            fontWeight: 700,
+                            fontSize: 11,
+                            color: "#fff",
+                            background: SKILL_COLOR[k] ?? "#636e72",
+                          }}
+                        >
+                          {k}
+                        </span>
+                        <span style={{ fontSize: 12, color: "var(--muted)" }}>
+                          {skillNameByKey.get(k) ?? build.skillOrderNames[i] ?? ""}
+                        </span>
+                        {i < build.skillOrder.length - 1 && (
+                          <span style={{ color: "var(--muted)", margin: "0 2px" }}>&gt;</span>
+                        )}
+                      </span>
+                    ))}
+                  </div>
+                </Row>
+              )}
+
+              {build.items.starter.length > 0 && (
+                <Row label="起始裝備">
+                  {build.items.starter.map((r, i) => (
+                    <Chip key={i}>{r.join(" + ")}</Chip>
+                  ))}
+                </Row>
+              )}
+
+              {build.items.boots.length > 0 && (
+                <Row label="鞋子">
+                  {build.items.boots.map((r, i) => (
+                    <Chip key={i}>{r.join("")}</Chip>
+                  ))}
+                </Row>
+              )}
+
+              {build.items.core.length > 0 && (
+                <Row label="核心組建">
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    {build.items.core.map((path, i) => (
+                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                        <span style={{ color: "var(--muted)", fontSize: 12, width: 16 }}>{i + 1}.</span>
+                        {path.map((it, j) => (
+                          <span key={j} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                            <Chip>{it}</Chip>
+                            {j < path.length - 1 && (
+                              <span style={{ color: "var(--muted)", fontSize: 12 }}>→</span>
+                            )}
+                          </span>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </Row>
+              )}
+            </>
+          )}
+
+          {abilities && (
+            <div style={{ borderTop: "1px solid var(--border)", paddingTop: 14 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.07em",
+                  color: "var(--muted)",
+                  marginBottom: 10,
+                }}
+              >
+                技能說明
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <AbilityRow badge="被動" color="#a29bfe" ability={abilities.passive} />
+                {abilities.spells.map((s) => (
+                  <AbilityRow
+                    key={s.key}
+                    badge={s.key}
+                    color={SKILL_COLOR[s.key] ?? "#636e72"}
+                    ability={s}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </Card>
+  );
+}
+
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+      <span style={{ width: 76, flexShrink: 0, fontSize: 12, color: "var(--muted)", paddingTop: 3 }}>
+        {label}
+      </span>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, flex: 1 }}>{children}</div>
+    </div>
+  );
+}
+
+function AbilityRow({
+  badge,
+  color,
+  ability,
+}: {
+  badge: string;
+  color: string;
+  ability: Ability;
+}) {
+  return (
+    <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+      <div style={{ position: "relative", flexShrink: 0 }}>
+        {ability.image ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={ability.image}
+            alt={ability.name}
+            width={32}
+            height={32}
+            style={{ borderRadius: 4, display: "block" }}
+          />
+        ) : (
+          <div style={{ width: 32, height: 32, borderRadius: 4, background: "var(--sf2)" }} />
+        )}
+        <span
+          style={{
+            position: "absolute",
+            bottom: -4,
+            right: -4,
+            fontSize: 10,
+            fontWeight: 700,
+            color: "#fff",
+            background: color,
+            borderRadius: 3,
+            padding: "0 3px",
+            lineHeight: 1.4,
+          }}
+        >
+          {badge}
+        </span>
+      </div>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontWeight: 600, fontSize: 13 }}>{ability.name}</div>
+        <div style={{ color: "var(--muted)", fontSize: 12, lineHeight: 1.5, marginTop: 2 }}>
+          {ability.desc}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Tier list panel ─────────────────────────────────────────────────────────
 const TIERS = ["S", "A", "B", "C", "D", "E"] as const;
 
@@ -765,6 +1005,9 @@ export default function AramHelper({ champions }: { champions: Champion[] }) {
       {/* ── Phase: rounds ── */}
       {phase === "rounds" && confirmedChamp && (
         <div>
+          {/* Build & abilities reference */}
+          <BuildPanel champion={confirmedChamp} />
+
           {/* History + active bonds */}
           {roundHistory.length > 0 && (
             <Card>
