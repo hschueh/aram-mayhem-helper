@@ -671,7 +671,7 @@ async function scrape() {
     const brand = output.champions.find((c) => c.key === 'brand');
     if (brand) {
       for (const aug of brand.augments.slice(0, 10)) {
-        console.log(`  [${aug.tier}] ${aug.nameZh.padEnd(12)} / ${aug.nameEn.padEnd(20)}  score: ${aug.performance.toFixed(1)}`);
+        console.log(`  [${aug.tier}] ${(aug.nameZh ?? '').padEnd(12)} / ${(aug.nameEn ?? '').padEnd(20)}  score: ${aug.performance.toFixed(1)}`);
       }
     }
 
