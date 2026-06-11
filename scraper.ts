@@ -263,9 +263,9 @@ async function fetchScripts(context: BrowserContext, url: string): Promise<strin
         const rows = document.querySelectorAll('table tbody tr');
         return rows.length > 0 && !(rows[0] as HTMLElement).querySelector?.('.animate-pulse');
       },
-      { timeout: 25000 }
+      { timeout: 30000 }
     ).catch(() => { /* fall through; parser will surface the failure */ });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2500);
     return await page.evaluate(() =>
       Array.from(document.querySelectorAll('script'))
         .map((s) => (s as HTMLScriptElement).innerText)
@@ -393,9 +393,24 @@ async function mapConcurrent<T, R>(
 // Main
 // ──────────────────────────────────────────────
 
+// Load existing JSON for fallback when scraping fails
+function loadExistingData(): Map<string, { augments: any[]; abilities: any; build: any }> {
+  const map = new Map<string, { augments: any[]; abilities: any; build: any }>();
+  try {
+    const existing = JSON.parse(fs.readFileSync(path.join(__dirname, 'aram-mayhem-data.json'), 'utf-8'));
+    for (const c of existing.champions ?? []) {
+      map.set(c.key, { augments: c.augments ?? [], abilities: c.abilities ?? null, build: c.build ?? null });
+    }
+  } catch { /* first run, no existing data */ }
+  return map;
+}
+
 async function scrape() {
   console.log('Launching browser...');
   const browser = await chromium.launch({ headless: true });
+
+  const existingData = loadExistingData();
+  console.log(`Loaded existing data for ${existingData.size} champions (fallback for failed scrapes).`);
 
   try {
     // ── Step 1: Load main pages (zh-tw + en) ──
@@ -423,7 +438,10 @@ async function scrape() {
     const zhAugById    = new Map(zhMain.augments.map((a) => [a.id, a]));
 
     // ── Step 2: Load each champion's /augments page ──
-    console.log(`\n[Step 2] Loading augment pages for ${zhMain.champions.length} champions (concurrency=10)...`);
+    const CONCURRENCY = 5;
+    const MAX_ATTEMPTS = 5;
+
+    console.log(`\n[Step 2] Loading augment pages for ${zhMain.champions.length} champions (concurrency=${CONCURRENCY}, max_attempts=${MAX_ATTEMPTS})...`);
 
     let champKeys = zhMain.champions.map((c) => c.key);
     // Dev hook: SCRAPE_LIMIT=N processes only the first N champions (faster iteration).
@@ -433,10 +451,9 @@ async function scrape() {
       console.log(`  [SCRAPE_LIMIT] restricted to ${champKeys.length} champions: ${champKeys.join(', ')}`);
     }
 
-    const MAX_ATTEMPTS = 4;
     const champAugResults: ChampionAugmentData[] = await mapConcurrent(
       champKeys,
-      5,
+      CONCURRENCY,
       async (key, idx) => {
         const url = `https://op.gg/zh-tw/lol/modes/aram-mayhem/${key}/augments`;
         let lastErr = '';
@@ -452,9 +469,9 @@ async function scrape() {
           } catch (e) {
             lastErr = (e as Error).message.slice(0, 60);
           }
-          // Backoff before retry: 2s, 5s, 10s
+          // Backoff before retry: 2s, 5s, 10s, 15s
           if (attempt < MAX_ATTEMPTS) {
-            const backoff = [2000, 5000, 10000][attempt - 1];
+            const backoff = [2000, 5000, 10000, 15000][attempt - 1];
             process.stdout.write(`\r  [retry ${attempt}/${MAX_ATTEMPTS - 1}] ${key} (${lastErr}), waiting ${backoff}ms\n`);
             await sleep(backoff);
           }
@@ -466,11 +483,11 @@ async function scrape() {
     console.log('\n  Done.');
 
     // ── Step 2b: Load each champion's /build page (abilities + item/skill build) ──
-    console.log(`\n[Step 2b] Loading build pages for ${champKeys.length} champions (concurrency=5)...`);
+    console.log(`\n[Step 2b] Loading build pages for ${champKeys.length} champions (concurrency=${CONCURRENCY})...`);
 
     const champBuildResults: ChampionBuildData[] = await mapConcurrent(
       champKeys,
-      5,
+      CONCURRENCY,
       async (key, idx) => {
         let lastErr = '';
         for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
@@ -485,7 +502,7 @@ async function scrape() {
             lastErr = (e as Error).message.slice(0, 60);
           }
           if (attempt < MAX_ATTEMPTS) {
-            const backoff = [2000, 5000, 10000][attempt - 1];
+            const backoff = [2000, 5000, 10000, 15000][attempt - 1];
             process.stdout.write(`\r  [retry ${attempt}/${MAX_ATTEMPTS - 1}] ${key} build (${lastErr}), waiting ${backoff}ms\n`);
             await sleep(backoff);
           }
@@ -515,27 +532,41 @@ async function scrape() {
       champions: sortedChampions.map((zh) => {
         const en = enChampByKey.get(zh.key);
         const augResult = champAugResults.find((r) => r.championKey === zh.key);
-        const augments = (augResult?.augments ?? [])
-          .sort((a, b) => a.tier !== b.tier ? a.tier - b.tier : b.performance - a.performance)
-          .map((aug) => {
-            const enAug = enAugById.get(aug.id);
-            const zhAug = zhAugById.get(aug.id);
-            return {
-              id: aug.id,
-              key: aug.key,
-              nameZh: aug.name,
-              nameEn: enAug?.name ?? aug.key,
-              tier: augTierLabel(aug.tier),
-              tierRaw: aug.tier,
-              performance: aug.performance,
-              popular: aug.popular,
-              desc: aug.desc?.replace(/<[^>]+>/g, '') ?? zhAug?.desc?.replace(/<[^>]+>/g, '') ?? '',
-            };
-          });
+        const scrapedAugments = augResult?.augments ?? [];
+        const existingChamp = existingData.get(zh.key);
+
+        let augments: ReturnType<typeof augTierLabel> extends string ? any[] : any[];
+        if (scrapedAugments.length > 0) {
+          augments = scrapedAugments
+            .filter((aug) => aug.name || enAugById.get(aug.id)?.name)
+            .sort((a, b) => a.tier !== b.tier ? a.tier - b.tier : b.performance - a.performance)
+            .map((aug) => {
+              const enAug = enAugById.get(aug.id);
+              const zhAug = zhAugById.get(aug.id);
+              return {
+                id: aug.id,
+                key: aug.key,
+                nameZh: aug.name,
+                nameEn: enAug?.name ?? aug.key,
+                tier: augTierLabel(aug.tier),
+                tierRaw: aug.tier,
+                performance: aug.performance,
+                popular: aug.popular,
+                desc: aug.desc?.replace(/<[^>]+>/g, '') ?? zhAug?.desc?.replace(/<[^>]+>/g, '') ?? '',
+              };
+            });
+        } else if (existingChamp && existingChamp.augments.length > 0) {
+          // Scrape failed — keep old augment data rather than wiping it
+          process.stdout.write(`\r  [FALLBACK] ${zh.key}: using ${existingChamp.augments.length} augments from previous data\n`);
+          augments = existingChamp.augments;
+        } else {
+          augments = [];
+        }
 
         const buildResult = champBuildResults.find((r) => r.championKey === zh.key);
-        const abilities = buildResult?.abilities ?? null;
+        const abilities = buildResult?.abilities ?? existingChamp?.abilities ?? null;
         const rawBuild = buildResult?.build ?? null;
+        const existingBuild = (!rawBuild && existingChamp?.build) ? existingChamp.build : null;
 
         // Derive skill leveling priority (keys) from the ability names op.gg shows.
         const nameToKey = new Map((abilities?.spells ?? []).map((s) => [s.name, s.key]));
@@ -546,7 +577,7 @@ async function scrape() {
               skillOrderNames: rawBuild.skillOrderNames,
               items: rawBuild.items,
             }
-          : null;
+          : existingBuild ?? null;
 
         return {
           rank: zh.rank,
