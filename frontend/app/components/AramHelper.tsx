@@ -761,7 +761,13 @@ function TierListPanel({
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export default function AramHelper({ champions }: { champions: Champion[] }) {
+export default function AramHelper({
+  champions,
+  scrapedAt,
+}: {
+  champions: Champion[];
+  scrapedAt?: string;
+}) {
   const [phase, setPhase] = useState<"select" | "rounds">("select");
 
   // Phase: select
@@ -870,6 +876,7 @@ export default function AramHelper({ champions }: { champions: Champion[] }) {
           <p style={{ color: "var(--muted)", fontSize: 13, marginTop: 4 }}>
             {phase === "select" ? "選擇你的英雄" : "增強選擇進行中"}
           </p>
+          {scrapedAt && <DataFreshness scrapedAt={scrapedAt} />}
         </div>
         {phase === "rounds" && confirmedChamp && (
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -1143,6 +1150,25 @@ export default function AramHelper({ champions }: { champions: Champion[] }) {
         </div>
       )}
     </div>
+  );
+}
+
+// ─── Data freshness ───────────────────────────────────────────────────────────
+function DataFreshness({ scrapedAt }: { scrapedAt: string }) {
+  const [daysOld, setDaysOld] = useState<number | null>(null);
+  // Computed client-side only — the static build's "now" would be stale by definition
+  useEffect(() => {
+    setDaysOld(Math.floor((Date.now() - new Date(scrapedAt).getTime()) / 86400000));
+  }, [scrapedAt]);
+
+  const stale = daysOld !== null && daysOld >= 10;
+  const dateStr = scrapedAt.slice(0, 10);
+  return (
+    <p style={{ color: stale ? "#ffa502" : "var(--muted)", fontSize: 11, marginTop: 2 }}>
+      資料更新：{dateStr}
+      {daysOld !== null && `（${daysOld} 天前）`}
+      {stale && " ⚠️ 該 rescrape 了"}
+    </p>
   );
 }
 
