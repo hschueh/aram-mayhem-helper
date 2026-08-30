@@ -1,185 +1,189 @@
 # 翱銳龍獸 / Aurelion Sol
 
 **模式**: ARAM: 大亂鬥  
-**強度**: B 階 (排名 #24)  
-**更新時間**: 2026-08-19T06:14:53.381Z
+**強度**: A 階 (排名 #12)  
+**更新時間**: 2026-08-30T00:53:17.898Z
 
 ## 推薦增強 / Recommended Augments
 
 | 評級 | 增強 (中) | Augment (EN) | 分數 | 選用率 |
 |------|-----------|--------------|------|--------|
-| S | 別轉台 | Don't Change the Channel | 98.8 | 1.0% |
-| S | 燃燒利息 | Combusting Interest | 97.4 | 1.7% |
-| S | 超遠射擊 | From Downtown | 94.2 | 2.2% |
-| S | 極度邪惡 | Phenomenal Evil | 92.5 | 6.5% |
-| S | 無限循環 | Infinite Recursion | 92.5 | 2.6% |
-| S | 煉獄使者 | Infernal Conduit | 92.3 | 7.5% |
-| S | 術士果汁盒 | Warlock Juicebox | 91.6 | 8.7% |
-| S | 雪地踱步 | Ice Cold | 91.3 | 8.0% |
-| S | 超強大腦 | Big Brain | 91.3 | 2.9% |
-| S | 魔法導彈 | Magic Missile | 90.8 | 6.2% |
-| S | 追求力量 | Pursuit of Power | 90.8 | 1.7% |
-| S | 靈光一閃 | Eureka | 90.1 | 4.8% |
-| S | 因心成體 | Mind to Matter | 89.1 | 2.1% |
-| S | 質變：稜鏡 | Transmute: Prismatic | 87.9 | 1.9% |
-| S | 女巫思維 | Witchful Thinking | 87.7 | 2.8% |
-| A | 堆層暴龍 | Stackosaurus Rex | 100.8 | 0.5% |
-| A | 侵蝕裝甲 | Erosion | 99.3 | 0.5% |
-| A | 大師鑄造 | Forged By The Master | 97.8 | 0.6% |
-| A | 巨人殺手 | Giant Slayer | 96.2 | 0.4% |
-| A | 豪氣賭客 | High Roller | 94.2 | 0.6% |
-| A | 逃跑計畫 | Escape Plan | 94.0 | 0.3% |
-| A | 縮小引擎 | Shrink Engine | 93.7 | 0.9% |
-| A | 自始至終 | From Beginning To End | 92.6 | 0.3% |
-| A | 灼熱黎明 | Searing Dawn | 92.3 | 0.3% |
-| A | 海洋之魂 | Ocean Soul | 92.0 | 0.4% |
-| A | 腳程加速 | With Haste | 92.0 | 1.3% |
-| A | 斗內 | Donation | 91.5 | 0.6% |
-| A | 循環利用 | Recursion | 90.8 | 0.9% |
-| A | 海克斯科技龍魂 | Hextech Soul | 90.6 | 0.4% |
-| A | 雙響炮 | Twin Fire | 90.6 | 0.5% |
-| A | 飲血 | Goredrink | 89.9 | 0.4% |
-| A | 能力值堆起來！ | Stats on Stats! | 88.9 | 0.5% |
-| A | 土司和起司 | Bread and Cheese | 88.7 | 1.1% |
-| A | 坦克引擎 | Tank Engine | 88.5 | 0.3% |
-| A | 靈活轉換 | ADAPt | 88.1 | 0.4% |
-| A | 純粹 - 法師 | Purist - Caster | 87.9 | 1.5% |
-| A | 質變：金級 | Transmute: Gold | 87.9 | 0.7% |
-| A | 煉獄惡靈 | Infernal Soul | 87.4 | 0.3% |
-| A | 質變：大混亂 | Transmute: Chaos | 87.2 | 0.6% |
-| A | 虹吸 | Siphon | 87.2 | 0.7% |
-| A | 殺戮時間 | It's Killing Time | 87.0 | 1.2% |
-| A | 拍拍鼓勵 | Pat On The Back | 87.0 | 0.3% |
-| A | 穿針引線 | Thread the Needle | 86.5 | 0.6% |
-| A | 奪命飛踢 | Dropkick | 85.8 | 0.3% |
-| A | 不祥契約 | Ominous Pact | 84.7 | 0.9% |
-| A | 大絕覺醒 | Ultimate Awakening | 84.7 | 0.7% |
-| A | 升級中婭沙漏 | Upgrade Zhonya's | 83.8 | 1.0% |
-| A | 牙仙 | Tooth Fairy | 83.5 | 1.4% |
-| A | 烏莉特的法帽 | Wooglet's Witchcap | 83.3 | 1.8% |
-| A | 終極革新 | Ultimate Revolution | 83.1 | 1.2% |
-| A | 妖精魔法 | Fey Magic | 83.0 | 0.8% |
-| A | 大法師 | Archmage | 82.6 | 2.0% |
-| A | 幻影武器 | Ethereal Weapon | 80.6 | 1.7% |
-| B | 溫泉加速 | Homeguard | 94.5 | 0.2% |
-| B | 全能之魂 | Omni Soul | 93.9 | 0.2% |
-| B | 急遽成長 | Growth Spurt | 85.9 | 0.2% |
-| B | 不可通行 | Impassable | 84.7 | 0.2% |
-| B | 靈魂淨化 | Spiritual Purification | 83.8 | 0.3% |
-| B | 聖光顯靈 | Divine Intervention | 83.3 | 0.3% |
-| B | 哎呀，我的金幣！ | Yowch, My Coins! | 83.3 | 0.3% |
-| B | 射手法師 | Marksmage | 82.1 | 0.3% |
-| B | 高能量場域 | Surge Field | 81.4 | 0.3% |
-| B | 殘忍 | Cruelty | 81.3 | 0.6% |
-| B | 玻璃大砲 | Glass Cannon | 79.9 | 0.3% |
-| B | 強化攻擊 | Juiced | 79.4 | 0.4% |
-| B | 潘朵拉的寶盒 | Pandora's Box | 74.8 | 0.3% |
-| C | 奏鳴曲 | Sonata | 94.3 | 0.2% |
-| C | 瘋狂科學家 | Mad Scientist | 93.4 | 0.2% |
-| C | 守護面紗 | Veil of Warding | 90.8 | 0.2% |
-| C | 腿部訓練日 | Leg Day | 89.4 | 0.2% |
-| C | 黃金撕裂 | Goldrend | 88.0 | 0.2% |
-| C | 痛打一頓 | Slap Around | 87.6 | 0.2% |
-| C | 土司和奶油 | Bread And Butter | 83.0 | 0.2% |
-| C | 無法掌握 | Can't Touch This | 82.3 | 0.2% |
-| C | 基本功夫 | Back To Basics | 81.9 | 0.2% |
-| D | 天降戰熊 | DropBear | 99.1 | 0.1% |
-| D | 吃過路兵 | En Passant | 92.3 | 0.1% |
-| D | 別眨眼 | Don't Blink | 91.8 | 0.1% |
-| D | 巴龍之爪 | Hand of Baron | 91.5 | 0.1% |
-| D | 鯊魚誘餌 | Shark Bait | 90.7 | 0.1% |
-| D | 棒棒回力鏢 | Ok Boomerang | 89.8 | 0.2% |
-| D | 閃光俠 | Flashy | 89.6 | 0.2% |
-| D | 能力值！ | Stats! | 88.6 | 0.1% |
-| D | 共享治療 | Our Healing | 88.5 | 0.1% |
-| D | 自然治療 | Nature is Healing | 88.0 | 0.1% |
-| D | 裂地龍魂 | Mountain Soul | 87.8 | 0.1% |
-| D | 黎明使者之決意 | Dawnbringer's Resolve | 87.3 | 0.2% |
-| D | 火狐 | FireFox | 87.0 | 0.1% |
-| D | 自爆炸彈客 | Dive Bomber | 85.9 | 0.1% |
-| D | 巨人 | Goliath | 84.6 | 0.2% |
-| D | 封我為王 | King Me | 84.3 | 0.2% |
-| D | 搗蛋鬼 | Poltergeist | 84.0 | 0.1% |
-| D | 躲草叢 | Hide on Bush | 84.0 | 0.1% |
-| D | 煽風點火 | Firebrand | 83.5 | 0.1% |
-| D | 縮小光線 | Shrink Ray | 83.1 | 0.1% |
-| D | 能力值堆堆堆起來！ | Stats on Stats on Stats! | 83.0 | 0.2% |
-| D | 天界之身 | Celestial Body | 82.6 | 0.1% |
-| D | 溢流 | Overflow | 82.6 | 0.2% |
-| D | 鯊魚風暴 | Shark Tempest | 82.5 | 0.1% |
-| D | 無敵大絕 | Ultimate Unstoppable | 82.2 | 0.1% |
-| D | 巨像之勇氣 | Courage of the Colossus | 81.5 | 0.1% |
-| D | 土司和果醬 | Bread And Jam | 81.3 | 0.1% |
-| D | 頂尖發明家 | Apex Inventor | 81.0 | 0.2% |
-| D | 彈珠台 | Pinball | 80.9 | 0.1% |
-| D | 巨無霸雪球 | Biggest Snowball Ever | 80.9 | 0.2% |
-| D | 食魂者 | Soul Eater | 80.7 | 0.1% |
-| D | 暗夜潛行 | Nightstalking | 80.0 | 0.1% |
-| D | 泰坦的決意 | Titan's Resolve | 79.6 | 0.1% |
-| D | 普羅衝鋒 | Poro Stampede | 79.3 | 0.1% |
-| D | 大絕電腦 | Ult Bot | 77.7 | 0.2% |
-| D | 阿福英雄 | Urf's Champion | 76.4 | 0.1% |
-| E | 急救箱 | First-Aid Kit | 170.0 | 0.0% |
-| E | 風語者的祝福 | Windspeaker's Blessing | 170.0 | 0.0% |
+| S | 堆層暴龍 | Stackosaurus Rex | 102.7 | 1.3% |
+| S | 別轉台 | Don't Change the Channel | 100.5 | 2.0% |
+| S | 燃燒利息 | Combusting Interest | 100.1 | 3.5% |
+| S | 豪氣賭客 | High Roller | 99.1 | 1.5% |
+| S | 超遠射擊 | From Downtown | 95.4 | 2.2% |
+| S | 縮小引擎 | Shrink Engine | 93.5 | 1.4% |
+| S | 術士果汁盒 | Warlock Juicebox | 93.3 | 7.3% |
+| S | 煉獄使者 | Infernal Conduit | 93.2 | 5.8% |
+| S | 無限循環 | Infinite Recursion | 92.5 | 2.1% |
+| S | 極度邪惡 | Phenomenal Evil | 92.3 | 5.4% |
+| S | 雪地踱步 | Ice Cold | 92.0 | 6.4% |
+| S | 超強大腦 | Big Brain | 91.6 | 2.4% |
+| S | 魔法導彈 | Magic Missile | 91.1 | 5.2% |
+| S | 追求力量 | Pursuit of Power | 91.1 | 2.0% |
+| S | 循環利用 | Recursion | 91.0 | 1.6% |
+| S | 因心成體 | Mind to Matter | 90.8 | 1.5% |
+| S | 土司和起司 | Bread and Cheese | 90.6 | 2.0% |
+| S | 靈光一閃 | Eureka | 90.1 | 3.9% |
+| S | 虹吸 | Siphon | 89.9 | 1.8% |
+| S | 質變：稜鏡 | Transmute: Prismatic | 89.1 | 2.3% |
+| S | 女巫思維 | Witchful Thinking | 86.9 | 2.2% |
+| A | 巨人殺手 | Giant Slayer | 99.6 | 0.5% |
+| A | 侵蝕裝甲 | Erosion | 98.9 | 0.8% |
+| A | 瘋狂科學家 | Mad Scientist | 96.4 | 0.4% |
+| A | 溫泉加速 | Homeguard | 96.2 | 0.3% |
+| A | 自始至終 | From Beginning To End | 95.9 | 0.7% |
+| A | 大師鑄造 | Forged By The Master | 95.5 | 0.7% |
+| A | 全能之魂 | Omni Soul | 92.1 | 0.3% |
+| A | 海洋之魂 | Ocean Soul | 91.8 | 0.4% |
+| A | 雙響炮 | Twin Fire | 91.6 | 0.9% |
+| A | 能力值堆起來！ | Stats on Stats! | 91.1 | 0.6% |
+| A | 斗內 | Donation | 91.1 | 0.6% |
+| A | 灼熱黎明 | Searing Dawn | 91.0 | 0.5% |
+| A | 坦克引擎 | Tank Engine | 90.8 | 0.6% |
+| A | 飲血 | Goredrink | 90.6 | 0.7% |
+| A | 腳程加速 | With Haste | 88.9 | 0.7% |
+| A | 質變：大混亂 | Transmute: Chaos | 88.9 | 0.7% |
+| A | 海克斯科技龍魂 | Hextech Soul | 88.9 | 0.5% |
+| A | 殺戮時間 | It's Killing Time | 88.7 | 1.0% |
+| A | 質變：金級 | Transmute: Gold | 88.6 | 0.8% |
+| A | 哎呀，我的金幣！ | Yowch, My Coins! | 88.4 | 0.3% |
+| A | 煉獄惡靈 | Infernal Soul | 88.3 | 0.3% |
+| A | 靈活轉換 | ADAPt | 88.2 | 0.6% |
+| A | 穿針引線 | Thread the Needle | 87.7 | 1.0% |
+| A | 純粹 - 法師 | Purist - Caster | 87.7 | 0.8% |
+| A | 寶石手套 | Jeweled Gauntlet | 87.5 | 1.3% |
+| A | 靈魂淨化 | Spiritual Purification | 86.9 | 0.4% |
+| A | 奪命飛踢 | Dropkick | 86.7 | 0.6% |
+| A | 聖光顯靈 | Divine Intervention | 86.7 | 0.4% |
+| A | 不祥契約 | Ominous Pact | 86.0 | 0.8% |
+| A | 升級中婭沙漏 | Upgrade Zhonya's | 84.3 | 0.8% |
+| A | 終極革新 | Ultimate Revolution | 84.2 | 1.1% |
+| A | 牙仙 | Tooth Fairy | 83.7 | 1.1% |
+| A | 妖精魔法 | Fey Magic | 83.6 | 0.7% |
+| A | 烏莉特的法帽 | Wooglet's Witchcap | 83.1 | 1.5% |
+| A | 大絕覺醒 | Ultimate Awakening | 83.0 | 0.6% |
+| A | 大法師 | Archmage | 81.9 | 1.7% |
+| A | 幻影武器 | Ethereal Weapon | 81.4 | 1.5% |
+| B | 黃金撕裂 | Goldrend | 92.5 | 0.2% |
+| B | 巨人 | Goliath | 86.2 | 0.3% |
+| B | 殘忍 | Cruelty | 83.8 | 0.4% |
+| B | 玻璃大砲 | Glass Cannon | 78.9 | 0.3% |
+| B | 射手法師 | Marksmage | 77.9 | 0.3% |
+| B | 潘朵拉的寶盒 | Pandora's Box | 77.5 | 0.3% |
+| B | 大絕電腦 | Ult Bot | 76.8 | 0.3% |
+| C | 吃過路兵 | En Passant | 93.0 | 0.2% |
+| C | 自然治療 | Nature is Healing | 90.8 | 0.2% |
+| C | 棒棒回力鏢 | Ok Boomerang | 90.7 | 0.2% |
+| C | 黎明使者之決意 | Dawnbringer's Resolve | 90.3 | 0.2% |
+| C | 封我為王 | King Me | 89.7 | 0.2% |
+| C | 能力值堆堆堆起來！ | Stats on Stats on Stats! | 88.8 | 0.2% |
+| C | 巨無霸雪球 | Biggest Snowball Ever | 86.0 | 0.2% |
+| C | 基本功夫 | Back To Basics | 81.8 | 0.2% |
+| C | 高能量場域 | Surge Field | 80.4 | 0.2% |
+| C | 阿福英雄 | Urf's Champion | 79.8 | 0.2% |
+| C | 強化攻擊 | Juiced | 78.4 | 0.2% |
+| D | 天降戰熊 | DropBear | 98.0 | 0.1% |
+| D | 巴龍之爪 | Hand of Baron | 96.1 | 0.1% |
+| D | 別眨眼 | Don't Blink | 94.6 | 0.1% |
+| D | 逃跑計畫 | Escape Plan | 92.1 | 0.2% |
+| D | 奏鳴曲 | Sonata | 91.6 | 0.1% |
+| D | 火狐 | FireFox | 90.9 | 0.1% |
+| D | 守護面紗 | Veil of Warding | 90.5 | 0.1% |
+| D | 腿部訓練日 | Leg Day | 90.3 | 0.1% |
+| D | 最終型態 | Final Form | 89.0 | 0.1% |
+| D | 閃光俠 | Flashy | 88.5 | 0.1% |
+| D | 裂地龍魂 | Mountain Soul | 88.4 | 0.1% |
+| D | 能力值！ | Stats! | 88.3 | 0.1% |
+| D | 觸發地獄火狂襲 | Triggered Inferno | 88.3 | 0.1% |
+| D | 痛打一頓 | Slap Around | 87.3 | 0.1% |
+| D | 土司和果醬 | Bread And Jam | 86.5 | 0.1% |
+| D | 鯊魚誘餌 | Shark Bait | 86.2 | 0.1% |
+| D | 拍拍鼓勵 | Pat On The Back | 85.8 | 0.1% |
+| D | 暗夜潛行 | Nightstalking | 85.6 | 0.1% |
+| D | 天界之身 | Celestial Body | 85.2 | 0.2% |
+| D | 陰魂不散 | Hellbent | 85.1 | 0.1% |
+| D | 急遽成長 | Growth Spurt | 84.4 | 0.1% |
+| D | 鯊魚風暴 | Shark Tempest | 84.0 | 0.1% |
+| D | 土司和奶油 | Bread And Butter | 83.2 | 0.1% |
+| D | 不可通行 | Impassable | 83.0 | 0.2% |
+| D | 煽風點火 | Firebrand | 82.1 | 0.1% |
+| D | 巨像之勇氣 | Courage of the Colossus | 82.0 | 0.1% |
+| D | 無法掌握 | Can't Touch This | 82.0 | 0.2% |
+| D | 無敵大絕 | Ultimate Unstoppable | 81.3 | 0.1% |
+| D | 普羅衝鋒 | Poro Stampede | 81.2 | 0.1% |
+| D | 食魂者 | Soul Eater | 81.2 | 0.1% |
+| D | 彈珠台 | Pinball | 79.3 | 0.1% |
+| D | 頂尖發明家 | Apex Inventor | 78.4 | 0.2% |
+| D | 祕術拳擊 | Mystic Punch | 77.3 | 0.1% |
 | E | 空降水豚 | Droppybara | 170.0 | 0.0% |
-| E | 雙刀流 | Dual Wield | 170.0 | 0.0% |
-| E | 無盡屠滅 | Endless Decimation | 170.0 | 0.0% |
-| E | 適性之護 | Adaptive Ward | 170.0 | 0.0% |
-| E | 雪球輪盤 | Snowball Roulette | 139.1 | 0.0% |
-| E | 小丑學院 | Clown College | 113.3 | 0.0% |
+| E | 雷射治療 | Laser Heal | 170.0 | 0.0% |
+| E | 終城快車 | Final City Transit | 127.5 | 0.0% |
+| E | 幻焰之誓 | Empyrean Promise | 121.4 | 0.0% |
+| E | 毫髮無傷 | Tank It Or Leave It | 119.0 | 0.0% |
 | E | 輸出超負荷 | Overloaded | 113.3 | 0.0% |
-| E | 剛毅 | Perseverance | 109.3 | 0.0% |
-| E | 痛恨一擊 | It's Critical | 107.0 | 0.0% |
+| E | 疾速追擊 | Pursuit of Haste | 111.2 | 0.0% |
+| E | 暴擊沖天炮 | Critical Missile | 110.5 | 0.0% |
+| E | 普羅能量炮 | Poro Blaster | 102.0 | 0.0% |
 | E | 二次閃現 | Flash 2 | 102.0 | 0.0% |
-| E | 量子計算 | Quantum Computing | 102.0 | 0.0% |
-| E | 阿嬤的辣油 | Grandma's Chili Oil | 99.7 | 0.0% |
-| E | 疾速追擊 | Pursuit of Haste | 97.1 | 0.0% |
-| E | 收頭好手 | Kill Secured | 93.6 | 0.1% |
-| E | 雪球升級 | Snowball Upgrade | 93.5 | 0.0% |
-| E | 見縫插針 | Vulnerability | 91.2 | 0.0% |
-| E | 回春 | Rejuvenation | 90.7 | 0.0% |
-| E | 寶石手套 | Jeweled Gauntlet | 89.3 | 0.0% |
-| E | 降雪之日 | Snowday | 89.1 | 0.0% |
-| E | 重型打手 | Heavy Hitter | 88.4 | 0.0% |
-| E | 頂狙武器 | Scopiest Weapons | 87.4 | 0.0% |
-| E | 過度延伸 | Overextender | 87.4 | 0.0% |
-| E | 狂躁！ | Get Excited! | 87.0 | 0.0% |
-| E | 劍舞之心 | Blade Waltz | 86.5 | 0.0% |
-| E | 豪豬 | Porcupine | 85.3 | 0.0% |
-| E | 壓力火鍋 | Pressure Cooker | 85.0 | 0.0% |
-| E | 靈魂炸彈 | Spirit Bomb | 85.0 | 0.0% |
-| E | 最終型態 | Final Form | 85.0 | 0.0% |
-| E | 終城快車 | Final City Transit | 85.0 | 0.0% |
-| E | 升級閃耀劍 | Upgrade Sheen | 85.0 | 0.0% |
-| E | 把我耍得團團轉 | Spin Me Right Round | 83.2 | 0.0% |
-| E | 超狙武器 | Scopier Weapons | 82.6 | 0.0% |
-| E | 普羅能量炮 | Poro Blaster | 81.6 | 0.0% |
-| E | 射程強化改造 | Scoped Weapons | 81.4 | 0.0% |
-| E | 戰爭交響曲 | Symphony of War | 81.3 | 0.0% |
-| E | 祕術拳擊 | Mystic Punch | 80.3 | 0.1% |
-| E | 神聖雪球 | Holy Snowball | 79.6 | 0.0% |
-| E | 手腳麻利 | Deft | 79.4 | 0.0% |
-| E | 觸發地獄火狂襲 | Triggered Inferno | 77.6 | 0.0% |
-| E | 雪爆 | Snowblast | 75.8 | 0.1% |
-| E | 閃光彈 | Flashbang | 75.6 | 0.0% |
-| E | 幻焰之誓 | Empyrean Promise | 74.4 | 0.0% |
-| E | 亮起來！ | Light 'Em Up! | 73.8 | 0.0% |
-| E | 伸縮手掌黏黏樂 | Squishy Slappy Grab | 72.9 | 0.0% |
-| E | 暴擊治療 | Critical Healing | 72.9 | 0.0% |
-| E | 吸血迷信 | Vampirism | 72.4 | 0.0% |
-| E | 靈魂虹吸 | Soul Siphon | 71.6 | 0.0% |
-| E | 輕舞飛揚 | Tap Dancer | 68.7 | 0.0% |
-| E | 次元轉移 | Dimension Shift | 67.7 | 0.0% |
-| E | 毫髮無傷 | Tank It Or Leave It | 65.4 | 0.0% |
-| E | 心鋼起來 | Steel Your Heart | 65.2 | 0.0% |
-| E | 暴擊沖天炮 | Critical Missile | 62.6 | 0.0% |
-| E | 旋風鎚 | Fan The Hammer | 56.7 | 0.0% |
-| E | 狂戰士 | Zealot | 48.6 | 0.0% |
-| E | 嗚咿嗚咿 | Wee Woo Wee Woo | 0.0 | 0.0% |
+| E | 阿嬤的辣油 | Grandma's Chili Oil | 101.6 | 0.0% |
+| E | 吸血迷信 | Vampirism | 99.9 | 0.0% |
+| E | 見縫插針 | Vulnerability | 95.1 | 0.0% |
+| E | 溢流 | Overflow | 94.8 | 0.0% |
+| E | 靈魂虹吸 | Soul Siphon | 92.7 | 0.0% |
+| E | 回春 | Rejuvenation | 90.9 | 0.0% |
+| E | 搗蛋鬼 | Poltergeist | 89.5 | 0.0% |
+| E | 手腳麻利 | Deft | 89.4 | 0.0% |
+| E | 過度延伸 | Overextender | 89.0 | 0.0% |
+| E | 收頭好手 | Kill Secured | 87.6 | 0.0% |
+| E | 豪豬 | Porcupine | 87.1 | 0.0% |
+| E | 躲草叢 | Hide on Bush | 86.6 | 0.1% |
+| E | 輕舞飛揚 | Tap Dancer | 86.0 | 0.0% |
+| E | 無盡屠滅 | Endless Decimation | 86.0 | 0.0% |
+| E | 閃光彈 | Flashbang | 85.0 | 0.0% |
+| E | 雪球輪盤 | Snowball Roulette | 85.0 | 0.0% |
+| E | 轉換惡作劇 | escAPADe | 85.0 | 0.0% |
+| E | 小丑學院 | Clown College | 85.0 | 0.0% |
+| E | 暴擊節奏 | Critical Rhythm | 85.0 | 0.0% |
+| E | 小惡魔在低語 | Devil on Your Shoulder | 85.0 | 0.0% |
+| E | 適性之護 | Adaptive Ward | 85.0 | 0.0% |
+| E | 神聖雪球 | Holy Snowball | 84.0 | 0.0% |
+| E | 共享治療 | Our Healing | 83.1 | 0.1% |
+| E | 次元轉移 | Dimension Shift | 82.4 | 0.0% |
+| E | 狂躁！ | Get Excited! | 81.3 | 0.0% |
+| E | 自爆炸彈客 | Dive Bomber | 81.2 | 0.0% |
+| E | 昇華儀式 | Rite of Ascension | 81.0 | 0.0% |
+| E | 戰爭交響曲 | Symphony of War | 80.5 | 0.0% |
+| E | 把我耍得團團轉 | Spin Me Right Round | 79.8 | 0.0% |
+| E | 超狙武器 | Scopier Weapons | 79.8 | 0.0% |
+| E | 雪爆 | Snowblast | 79.5 | 0.1% |
+| E | 縮小光線 | Shrink Ray | 79.4 | 0.0% |
+| E | 射程強化改造 | Scoped Weapons | 79.3 | 0.0% |
+| E | 伸縮手掌黏黏樂 | Squishy Slappy Grab | 79.0 | 0.0% |
+| E | 雪球升級 | Snowball Upgrade | 77.3 | 0.0% |
+| E | 降雪之日 | Snowday | 76.6 | 0.0% |
+| E | 頂狙武器 | Scopiest Weapons | 75.8 | 0.0% |
+| E | 雙修大師 | Master of Duality | 75.6 | 0.1% |
+| E | 升級閃耀劍 | Upgrade Sheen | 74.0 | 0.0% |
+| E | 泰坦的決意 | Titan's Resolve | 73.9 | 0.0% |
+| E | 劍舞之心 | Blade Waltz | 71.2 | 0.0% |
+| E | 剛毅 | Perseverance | 70.8 | 0.0% |
+| E | 壓力火鍋 | Pressure Cooker | 70.8 | 0.0% |
+| E | 心鋼起來 | Steel Your Heart | 69.7 | 0.0% |
+| E | 亮起來！ | Light 'Em Up! | 68.5 | 0.0% |
+| E | 狂戰士 | Zealot | 68.0 | 0.0% |
+| E | 重型打手 | Heavy Hitter | 67.2 | 0.0% |
+| E | 痛恨一擊 | It's Critical | 45.3 | 0.0% |
+| E | 量子計算 | Quantum Computing | 42.5 | 0.0% |
+| E | 暴擊治療 | Critical Healing | 42.5 | 0.0% |
+| E | 旋風鎚 | Fan The Hammer | 28.3 | 0.0% |
+| E | 靈魂炸彈 | Spirit Bomb | 0.0 | 0.0% |
+| E | 雙刀流 | Dual Wield | 0.0 | 0.0% |
+| E | 巨大盾牌 | Mighty Shield | 0.0 | 0.0% |
+| E | 普羅王跳跳 | Bounce of the Poro King | 0.0 | 0.0% |
+| E | 急救箱 | First-Aid Kit | 0.0 | 0.0% |
 | E | 全部都給你 | All For You | 0.0 | 0.0% |
-| E | 暴擊節奏 | Critical Rhythm | 0.0 | 0.0% |
-| E | 雙重命中 | Double Tap | 0.0 | 0.0% |
-| E | 暴擊和施法 | Crit 'n Cast | 0.0 | 0.0% |
 
 ## 出裝 & 加點 / Build
 
@@ -191,7 +195,7 @@
 1. 黑焰火炬 → 瑞萊的冰晶節杖 → 黎安卓的折磨
 2. 黑焰火炬 → 黎安卓的折磨 → 瑞萊的冰晶節杖
 3. 女神之淚 → 時光之杖 → 熾天使的擁抱 → 瑞萊的冰晶節杖
-4. 女神之淚 → 瑞萊的冰晶節杖 → 熾天使的擁抱 → 黎安卓的折磨
+4. 黑焰火炬 → 瑞萊的冰晶節杖 → 黯影之炎
 5. 時光之杖 → 瑞萊的冰晶節杖 → 黎安卓的折磨
 
 ## 技能說明 / Abilities
